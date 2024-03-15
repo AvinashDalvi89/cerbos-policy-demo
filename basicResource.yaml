@@ -1,57 +1,42 @@
-# yaml-language-server: $schema=https://api.cerbos.dev/latest/cerbos/policy/v1/Policy.schema.json
-
+---
 apiVersion: api.cerbos.dev/v1
 resourcePolicy:
   version: default
-
-  # This resource file is reviewed for when checking permissions when a resource
-  # is of `kind` "basicResource"
-  resource: basicResource
-
+  importDerivedRoles:
+    - common_roles
+  resource: contact
   rules:
-    # If the `principal`s role is `admin` then all the actions are allowed.
-    - actions:
-        - "*"
+    - actions: ["*"]
       effect: EFFECT_ALLOW
       roles:
-        - ADMIN
+        - admin
 
-    # Any user can create a resource
-    - actions:
-        - create
+    - actions: ["create"]
       effect: EFFECT_ALLOW
       roles:
-        - USER
-
-    # Any user can read a resource as long as it is published or owned by the user
-    - actions:
-        - read
-      effect: EFFECT_ALLOW
-      roles:
-        - USER
+        - user
       condition:
         match:
-          any:
+          expr: request.principal.attr.department == "Sales"
+
+    - actions: ["read", "update", "delete"]
+      effect: EFFECT_ALLOW
+      derivedRoles:
+        - owner
+
+    - actions: ["read"]
+      effect: EFFECT_ALLOW
+      roles:
+        - user
+      condition:
+        match:
+          all:
             of:
-              - expr: request.resource.attr.isPublished == true
-              - expr: request.resource.attr.ownerId == request.principal.id
-
-    # Only the owner of the resource can update or delete it
-    - actions:
-        - update
-        - delete
-      effect: EFFECT_ALLOW
-      roles:
-        - USER
-      condition:
-        match:
-          expr: request.resource.attr.ownerId == request.principal.id
-
-  schemas:
-    principalSchema:
-      ref: cerbos:///principal.json
-    resourceSchema:
-      ref: cerbos:///basicResource.json
-      ignoreWhen:
-        actions:
-          - create
+              - expr: request.resource.attr.active == true
+              - any:
+                  of:
+                    - expr: request.principal.attr.department == "Sales"
+                    - all:
+                        of:
+                          - expr: request.principal.attr.department == "Marketing"
+                          - expr: request.resource.attr.marketingOptIn == true
