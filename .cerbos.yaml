@@ -1,5 +1,5 @@
 storage:
   driver: disk
   disk:
-    directory: /basic-crud
+    directory: "${PWD}/policies"
     watchForChanges: true
