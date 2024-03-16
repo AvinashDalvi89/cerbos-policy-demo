@@ -3,3 +3,9 @@ storage:
   disk:
     directory: "/policies"
     watchForChanges: true
+server:
+  adminAPI:
+    enabled: true
+    adminCredentials:
+      username: cerbos
+      passwordHash: JDJ5JDEwJDhGdzYzQ0hYRkNPNlQ3TUUxLnRGcHU4ZC5sQVMyeUZSRkdpWTlFTFhYNmt4U01tTVg4SkpXCgo=
